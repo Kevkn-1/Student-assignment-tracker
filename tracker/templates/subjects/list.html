@@ -8,34 +8,41 @@
     </div>
 
     {% if subjects %}
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Code</th>
-                <th>Assignments</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for subject in subjects %}
-            <tr>
-                <td>{{ subject['name'] }}</td>
-                <td>{{ subject['code'] or '-' }}</td>
-                <td>{{ subject['assignment_count'] }}</td>
-                <td class="actions">
-                    <a class="btn" href="{{ url_for('subjects.edit', subject_id=subject['id']) }}">Edit</a>
-                    <form method="post" action="{{ url_for('subjects.delete', subject_id=subject['id']) }}"
-                        data-confirm="Delete this subject?">
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Code</th>
+                    <th scope="col">Assignments</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <td data-label="Name"><a href="{{ url_for('assignments.list_assignments', subject=subject['id']) }}">{{ subject['name'] }}</a></td>
+                    <td data-label="Code">{{ subject['code'] or '-' }}</td>
+                    <td>{{ subject['assignment_count'] }}</td>
+                    <td class="actions" data-label="Actions">
+                        <a class="btn" href="{{ url_for('subjects.edit', subject_id=subject['id']) }}">Edit</a>
+                        <form method="post" action="{{ url_for('subjects.delete', subject_id=subject['id']) }}"
+                            data-confirm="Delete this subject?">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-    <p class="empty">No subjects yet. Add your first subject to get started.</p>
+    <div class="empty-state">
+        <span class="empty-state-icon" aria-hidden="true">+</span>
+        <h3>No subjects yet</h3>
+        <p class="muted">Subjects are how assignments are organised. Add your first subject to get started.</p>
+        <a class="btn btn-primary" href="{{ url_for('subjects.create') }}">Add subject</a>
+    </div>
     {% endif %}
 </section>
 {% endblock %}

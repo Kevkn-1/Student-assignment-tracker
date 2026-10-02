@@ -136,13 +136,32 @@ def _validate(raw):
     return clean, errors
 
 
+def due_label(days_until):
+    """Human wording for the distance to a deadline (negative = overdue).
+
+    Lives here so both the assignment list/detail pages and the dashboard
+    describe deadlines with exactly the same wording.
+    """
+    if days_until < 0:
+        days = -days_until
+        return f"{days} day{'' if days == 1 else 's'} overdue"
+    if days_until == 0:
+        return "Due today"
+    if days_until == 1:
+        return "Due tomorrow"
+    return f"In {days_until} days"
+
+
 def _present(row, today):
-    """Turn a database row into a dict and add the computed 'overdue' flag."""
+    """Turn a database row into a dict and add the computed deadline fields."""
     assignment = dict(row)
     assignment["overdue"] = (
         assignment["status"] != "completed"
         and assignment["deadline"] < today.isoformat()
     )
+    days_until = (date.fromisoformat(assignment["deadline"]) - today).days
+    assignment["days_until"] = days_until
+    assignment["due_label"] = due_label(days_until)
     return assignment
 
 

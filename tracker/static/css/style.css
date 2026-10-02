@@ -1188,12 +1188,188 @@ a:hover {
         margin-bottom: .6rem;
     }
 
-    .table {
-        min-width: 680px;
-    }
-
     .actions {
         align-items: flex-start;
         flex-direction: column;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Presentation layer additions
+ * Deadline badges, empty states, form groups and responsive tables.
+ * ------------------------------------------------------------------ */
+
+/* Deadline state badges ------------------------------------------------ */
+.badge-today {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.badge-soon {
+    background: var(--peach-soft);
+    color: var(--warning);
+}
+
+.badge-done {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.deadline-cell {
+    white-space: nowrap;
+}
+
+.deadline-date {
+    display: block;
+    font-variant-numeric: tabular-nums;
+}
+
+.deadline-hint {
+    display: inline-block;
+    margin-left: .4rem;
+    color: var(--muted);
+    font-size: .74rem;
+}
+
+/* Focus (Today's focus) card ------------------------------------------ */
+.focus-card .item-list li {
+    padding: .6rem 0;
+}
+
+/* Empty states --------------------------------------------------------- */
+.empty-state {
+    text-align: center;
+    padding: 2.75rem 1.25rem;
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    background: var(--surface-soft);
+}
+
+.empty-state .empty-state-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+    font-size: 1.25rem;
+}
+
+.empty-state h3 {
+    margin: .95rem 0 .3rem;
+    font-size: 1.02rem;
+    letter-spacing: -.01em;
+}
+
+.empty-state p {
+    margin: 0 auto 1.15rem;
+    max-width: 46ch;
+    font-size: .88rem;
+}
+
+/* Form sections -------------------------------------------------------- */
+.form-section {
+    margin: 0 0 1.15rem;
+    padding: 1rem 1.15rem 1.15rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-soft);
+}
+
+.form-section legend {
+    padding: 0 .4rem;
+    color: var(--accent);
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.form-section > :last-child {
+    margin-bottom: 0;
+}
+
+.field-hint {
+    margin: .3rem 0 0;
+    color: var(--muted);
+    font-size: .78rem;
+}
+
+/* Keyboard focus ------------------------------------------------------- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Responsive: tables become stacked cards ------------------------------ */
+@media (max-width: 760px) {
+    .table {
+        min-width: 0;
+    }
+
+    .table-wrap {
+        overflow-x: visible;
+    }
+
+    .table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .table tbody tr {
+        display: block;
+        margin-bottom: .8rem;
+        padding: .85rem .95rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+    }
+
+    .table tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: .45rem 0;
+        text-align: right;
+        white-space: normal;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .table tbody tr td:last-child {
+        border-bottom: 0;
+    }
+
+    /* Every cell carries a visible label; the subjects table's count cell
+       is intentionally bare markup, so it gets the only hardcoded label. */
+    .table tbody td::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        color: var(--muted);
+        font-size: .68rem;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        text-align: left;
+    }
+
+    .table tbody td:not([data-label])::before {
+        content: "Assignments";
+    }
+
+    .table tbody td.deadline-cell {
+        display: block;
+        text-align: left;
+    }
+
+    .table tbody td.deadline-cell::before {
+        display: block;
+        margin-bottom: .25rem;
     }
 }

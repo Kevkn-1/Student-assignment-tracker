@@ -9,60 +9,67 @@
     <a class="btn btn-primary" href="{{ url_for('subjects.create') }}">Add a subject</a>
     {% else %}
     <form method="post" novalidate>
-        <div class="field">
-            <label for="subject_id">Subject *</label>
-            <select id="subject_id" name="subject_id" class="{{ 'invalid' if errors.get('subject_id') }}">
-                <option value="">Choose a subject...</option>
-                {% for s in subjects %}
-                <option value="{{ s['id'] }}" {{ 'selected' if form['subject_id']|string==s['id']|string }}>{{ s['name']
-                    }}</option>
-                {% endfor %}
-            </select>
-            {% if errors.get('subject_id') %}<p class="field-error">{{ errors['subject_id'] }}</p>{% endif %}
-        </div>
+        <fieldset class="form-section">
+            <legend>Assignment information</legend>
 
-        <div class="field">
-            <label for="title">Title *</label>
-            <input type="text" id="title" name="title" maxlength="150" required value="{{ form['title'] }}"
-                class="{{ 'invalid' if errors.get('title') }}">
-            {% if errors.get('title') %}<p class="field-error">{{ errors['title'] }}</p>{% endif %}
-        </div>
-
-        <div class="field">
-            <label for="description">Description (optional)</label>
-            <textarea id="description" name="description" rows="4" maxlength="2000"
-                class="{{ 'invalid' if errors.get('description') }}">{{ form['description'] }}</textarea>
-            {% if errors.get('description') %}<p class="field-error">{{ errors['description'] }}</p>{% endif %}
-        </div>
-
-        <div class="field-row">
             <div class="field">
-                <label for="priority">Priority *</label>
-                <select id="priority" name="priority" class="{{ 'invalid' if errors.get('priority') }}">
-                    {% for value, label in priority_choices %}
-                    <option value="{{ value }}" {{ 'selected' if form['priority']==value }}>{{ label }}</option>
+                <label for="title">Title *</label>
+                <input type="text" id="title" name="title" maxlength="150" required value="{{ form['title'] }}"
+                    class="{{ 'invalid' if errors.get('title') }}">
+                {% if errors.get('title') %}<p class="field-error">{{ errors['title'] }}</p>{% endif %}
+            </div>
+
+            <div class="field">
+                <label for="description">Description (optional)</label>
+                <textarea id="description" name="description" rows="4" maxlength="2000"
+                    class="{{ 'invalid' if errors.get('description') }}">{{ form['description'] }}</textarea>
+                {% if errors.get('description') %}<p class="field-error">{{ errors['description'] }}</p>{% endif %}
+            </div>
+
+            <div class="field">
+                <label for="subject_id">Subject *</label>
+                <select id="subject_id" name="subject_id" class="{{ 'invalid' if errors.get('subject_id') }}">
+                    <option value="">Choose a subject...</option>
+                    {% for s in subjects %}
+                    <option value="{{ s['id'] }}" {{ 'selected' if form['subject_id']|string==s['id']|string }}>{{ s['name'] }}</option>
                     {% endfor %}
                 </select>
-                {% if errors.get('priority') %}<p class="field-error">{{ errors['priority'] }}</p>{% endif %}
+                {% if errors.get('subject_id') %}<p class="field-error">{{ errors['subject_id'] }}</p>{% endif %}
             </div>
+        </fieldset>
 
-            <div class="field">
-                <label for="status">Status *</label>
-                <select id="status" name="status" class="{{ 'invalid' if errors.get('status') }}">
-                    {% for value, label in status_choices %}
-                    <option value="{{ value }}" {{ 'selected' if form['status']==value }}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-                {% if errors.get('status') %}<p class="field-error">{{ errors['status'] }}</p>{% endif %}
-            </div>
+        <fieldset class="form-section">
+            <legend>Planning</legend>
 
-            <div class="field">
-                <label for="deadline">Deadline *</label>
-                <input type="date" id="deadline" name="deadline" value="{{ form['deadline'] }}"
-                    class="{{ 'invalid' if errors.get('deadline') }}">
-                {% if errors.get('deadline') %}<p class="field-error">{{ errors['deadline'] }}</p>{% endif %}
+            <div class="field-row">
+                <div class="field">
+                    <label for="deadline">Deadline *</label>
+                    <input type="date" id="deadline" name="deadline" value="{{ form['deadline'] }}"
+                        class="{{ 'invalid' if errors.get('deadline') }}">
+                    {% if errors.get('deadline') %}<p class="field-error">{{ errors['deadline'] }}</p>{% endif %}
+                </div>
+
+                <div class="field">
+                    <label for="priority">Priority *</label>
+                    <select id="priority" name="priority" class="{{ 'invalid' if errors.get('priority') }}">
+                        {% for value, label in priority_choices %}
+                        <option value="{{ value }}" {{ 'selected' if form['priority']==value }}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.get('priority') %}<p class="field-error">{{ errors['priority'] }}</p>{% endif %}
+                </div>
+
+                <div class="field">
+                    <label for="status">Status *</label>
+                    <select id="status" name="status" class="{{ 'invalid' if errors.get('status') }}">
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {{ 'selected' if form['status']==value }}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.get('status') %}<p class="field-error">{{ errors['status'] }}</p>{% endif %}
+                </div>
             </div>
-        </div>
+        </fieldset>
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">{{ 'Save changes' if assignment else 'Create assignment'

@@ -18,8 +18,17 @@
 
         <dt>Deadline</dt>
         <dd>
-            {{ assignment['deadline'] }}
-            {% if assignment['overdue'] %}<span class="badge badge-overdue">Overdue</span>{% endif %}
+            <span class="deadline-date">{{ assignment['deadline'] }}</span>
+            {% if assignment['overdue'] %}
+            <span class="badge badge-overdue">Overdue</span>
+            <span class="deadline-hint">{{ assignment['due_label'] }}</span>
+            {% elif assignment['status'] == 'completed' %}
+            <span class="badge badge-done">Completed</span>
+            {% elif assignment['days_until'] == 0 %}
+            <span class="badge badge-today">Due today</span>
+            {% elif assignment['days_until'] <= 3 %}
+            <span class="badge badge-soon">{{ assignment['due_label'] }}</span>
+            {% endif %}
         </dd>
 
         <dt>Status</dt>

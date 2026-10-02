@@ -5,19 +5,24 @@
     <h2>{{ 'Edit subject' if subject else 'Add subject' }}</h2>
 
     <form method="post" novalidate>
-        <div class="field">
-            <label for="name">Name *</label>
-            <input type="text" id="name" name="name" maxlength="100" required value="{{ form['name'] }}"
-                class="{{ 'invalid' if errors.get('name') }}">
-            {% if errors.get('name') %}<p class="field-error">{{ errors['name'] }}</p>{% endif %}
-        </div>
+        <fieldset class="form-section">
+            <legend>Subject details</legend>
 
-        <div class="field">
-            <label for="code">Code (optional)</label>
-            <input type="text" id="code" name="code" maxlength="20" value="{{ form['code'] }}"
-                class="{{ 'invalid' if errors.get('code') }}">
-            {% if errors.get('code') %}<p class="field-error">{{ errors['code'] }}</p>{% endif %}
-        </div>
+            <div class="field">
+                <label for="name">Name *</label>
+                <input type="text" id="name" name="name" maxlength="100" required value="{{ form['name'] }}"
+                    class="{{ 'invalid' if errors.get('name') }}">
+                {% if errors.get('name') %}<p class="field-error">{{ errors['name'] }}</p>{% endif %}
+            </div>
+
+            <div class="field">
+                <label for="code">Code (optional)</label>
+                <input type="text" id="code" name="code" maxlength="20" value="{{ form['code'] }}"
+                    class="{{ 'invalid' if errors.get('code') }}">
+                <p class="field-hint">A short course or module code, for example CS101.</p>
+                {% if errors.get('code') %}<p class="field-error">{{ errors['code'] }}</p>{% endif %}
+            </div>
+        </fieldset>
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">{{ 'Save changes' if subject else 'Create subject' }}</button>

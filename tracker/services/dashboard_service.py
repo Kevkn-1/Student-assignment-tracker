@@ -2,10 +2,12 @@
 from datetime import date, timedelta
 
 from ..repositories import dashboard_repository as repo
-from .assignment_service import PRIORITY_CHOICES, STATUS_CHOICES
+from .assignment_service import PRIORITY_CHOICES, STATUS_CHOICES, due_label
 
 DUE_SOON_DAYS = 7   # "due soon" = today up to and including today + 7 days
 LIST_LIMIT = 5      # rows shown in the "due soon" and "overdue" lists
+FOCUS_LIMIT = 6     # rows shown in the "Today's focus" list
+FOCUS_SOON_DAYS = 2 # focus also covers work due within the next 2 days
 
 
 def percent(part, whole):
@@ -13,18 +15,6 @@ def percent(part, whole):
     if whole <= 0:
         return 0
     return (part * 100 + whole // 2) // whole
-
-
-def due_label(days_until):
-    """Human wording for the distance to a deadline (negative = overdue)."""
-    if days_until < 0:
-        days = -days_until
-        return f"{days} day{'' if days == 1 else 's'} overdue"
-    if days_until == 0:
-        return "Due today"
-    if days_until == 1:
-        return "Due tomorrow"
-    return f"In {days_until} days"
 
 
 def _with_due_label(rows, today):
@@ -36,6 +26,30 @@ def _with_due_label(rows, today):
         item["due_label"] = due_label(days_until)
         items.append(item)
     return items
+
+
+def _build_focus(overdue_list, due_soon):
+    """Overdue, due-today and very-soon work, most urgent first.
+
+    Built from rows already fetched for the dashboard lists, so this adds no
+    extra queries and reuses the existing deadline logic instead of duplicating it.
+    """
+    focus = []
+    for item in overdue_list:
+        row = dict(item)
+        row["kind"] = "overdue"
+        focus.append(row)
+
+    # due_soon is ordered by deadline, so everything past the window can be skipped.
+    for item in due_soon:
+        if len(focus) >= FOCUS_LIMIT:
+            break
+        if item["days_until"] > FOCUS_SOON_DAYS:
+            break
+        row = dict(item)
+        row["kind"] = "today" if item["days_until"] == 0 else "soon"
+        focus.append(row)
+    return focus[:FOCUS_LIMIT]
 
 
 def get_dashboard(today=None):
@@ -70,6 +84,12 @@ def get_dashboard(today=None):
             "percent": percent(row["completed"], row["total"]),
         })
 
+    # Deadline lists (hoisted so the focus list can reuse them)
+    due_soon = _with_due_label(
+        repo.due_between(today_iso, week_end_iso, LIST_LIMIT), today
+    )
+    overdue_list = _with_due_label(repo.overdue(today_iso, LIST_LIMIT), today)
+
     return {
         "today": today_iso,
         "has_data": total > 0,
@@ -87,8 +107,7 @@ def get_dashboard(today=None):
         "due_soon_days": DUE_SOON_DAYS,
         "priorities": priorities,
         "subjects": subjects,
-        "due_soon": _with_due_label(
-            repo.due_between(today_iso, week_end_iso, LIST_LIMIT), today
-        ),
-        "overdue_list": _with_due_label(repo.overdue(today_iso, LIST_LIMIT), today),
+        "due_soon": due_soon,
+        "overdue_list": overdue_list,
+        "focus": _build_focus(overdue_list, due_soon),
     }

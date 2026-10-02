@@ -77,26 +77,34 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Title</th>
-                    <th>Subject</th>
-                    <th>Priority</th>
-                    <th>Deadline</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Subject</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Deadline</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for a in assignments %}
                 <tr>
-                    <td><a href="{{ url_for('assignments.detail', assignment_id=a['id']) }}">{{ a['title'] }}</a></td>
-                    <td>{{ a['subject_name'] }}</td>
-                    <td>{{ priority_badge(a['priority']) }}</td>
-                    <td>
-                        {{ a['deadline'] }}
-                        {% if a['overdue'] %}<span class="badge badge-overdue">Overdue</span>{% endif %}
+                    <td data-label="Title"><a href="{{ url_for('assignments.detail', assignment_id=a['id']) }}">{{ a['title'] }}</a></td>
+                    <td data-label="Subject">{{ a['subject_name'] }}</td>
+                    <td data-label="Priority">{{ priority_badge(a['priority']) }}</td>
+                    <td class="deadline-cell" data-label="Deadline">
+                        <span class="deadline-date">{{ a['deadline'] }}</span>
+                        {% if a['overdue'] %}
+                        <span class="badge badge-overdue">Overdue</span>
+                        {% elif a['status'] == 'completed' %}
+                        <span class="badge badge-done">Completed</span>
+                        {% elif a['days_until'] == 0 %}
+                        <span class="badge badge-today">Due today</span>
+                        {% elif a['days_until'] <= 3 %}
+                        <span class="badge badge-soon">{{ a['due_label'] }}</span>
+                        {% endif %}
                     </td>
-                    <td>{{ status_form(a, 'list') }}</td>
-                    <td class="actions">
+                    <td data-label="Status">{{ status_form(a, 'list') }}</td>
+                    <td class="actions" data-label="Actions">
                         <a class="btn" href="{{ url_for('assignments.edit', assignment_id=a['id']) }}">Edit</a>
                         <form method="post" action="{{ url_for('assignments.delete', assignment_id=a['id']) }}"
                             data-confirm="Delete this assignment?">
@@ -112,9 +120,19 @@
     </div>
     {% else %}
     {% if is_filtered %}
-    <p class="empty">No assignments match your filters. <a href="{{ url_for('assignments.list_assignments') }}">Clear filters</a></p>
+    <div class="empty-state">
+        <span class="empty-state-icon" aria-hidden="true">?</span>
+        <h3>No assignments match your filters.</h3>
+        <p class="muted">Adjust the filters above, or reset them to see every assignment again.</p>
+        <a class="btn" href="{{ url_for('assignments.list_assignments') }}">Clear filters</a>
+    </div>
     {% else %}
-    <p class="empty">No assignments yet. Add your first assignment to get started.</p>
+    <div class="empty-state">
+        <span class="empty-state-icon" aria-hidden="true">+</span>
+        <h3>No assignments yet</h3>
+        <p class="muted">Add your first assignment to get started.</p>
+        <a class="btn btn-primary" href="{{ url_for('assignments.create') }}">Add assignment</a>
+    </div>
     {% endif %}
     {% endif %}
 </section>
