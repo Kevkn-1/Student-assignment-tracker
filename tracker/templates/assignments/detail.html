@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "assignments/_macros.html" import status_form, priority_badge with context %}
+{% block title %}{{ assignment['title'] }} - Student Assignment Tracker{% endblock %}
+{% block content %}
+<section class="card">
+    <div class="card-header">
+        <h2>{{ assignment['title'] }}</h2>
+        <a class="btn" href="{{ url_for('assignments.list_assignments') }}">Back to list</a>
+    </div>
+
+    <dl class="details">
+        <dt>Subject</dt>
+        <dd>{{ assignment['subject_name'] }}{% if assignment['subject_code'] %} ({{ assignment['subject_code'] }}){%
+            endif %}</dd>
+
+        <dt>Priority</dt>
+        <dd>{{ priority_badge(assignment['priority']) }}</dd>
+
+        <dt>Deadline</dt>
+        <dd>
+            {{ assignment['deadline'] }}
+            {% if assignment['overdue'] %}<span class="badge badge-overdue">Overdue</span>{% endif %}
+        </dd>
+
+        <dt>Status</dt>
+        <dd>{{ status_form(assignment, 'detail') }}</dd>
+
+        <dt>Description</dt>
+        <dd class="description">{{ assignment['description'] or 'No description.' }}</dd>
+
+        <dt>Created</dt>
+        <dd>{{ assignment['created_at'] }}</dd>
+
+        <dt>Last updated</dt>
+        <dd>{{ assignment['updated_at'] }}</dd>
+    </dl>
+
+    <div class="form-actions">
+        <a class="btn btn-primary" href="{{ url_for('assignments.edit', assignment_id=assignment['id']) }}">Edit</a>
+        <form method="post" action="{{ url_for('assignments.delete', assignment_id=assignment['id']) }}"
+            data-confirm="Delete this assignment?">
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

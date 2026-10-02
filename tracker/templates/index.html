@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+    <h2>Setup complete</h2>
+    <p>The Flask app is running and the SQLite database has been initialized.</p>
+    <p>Check the schema at <a href="{{ url_for('main.health') }}">/health</a>.</p>
+</section>
+{% endblock %}

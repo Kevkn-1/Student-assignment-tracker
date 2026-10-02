@@ -1,0 +1,17 @@
+{# Status dropdown that updates an assignment's status. Import with context. #}
+{% macro status_form(assignment, origin) %}
+<form method="post" action="{{ url_for('assignments.update_status', assignment_id=assignment['id']) }}"
+    class="status-form">
+    <input type="hidden" name="origin" value="{{ origin }}">
+    <select name="status" data-autosubmit aria-label="Status">
+        {% for value, label in status_choices %}
+        <option value="{{ value }}" {{ 'selected' if value==assignment['status'] }}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <noscript><button type="submit" class="btn">Update</button></noscript>
+</form>
+{% endmacro %}
+
+{% macro priority_badge(priority) %}
+<span class="badge badge-priority-{{ priority }}">{{ priority|capitalize }}</span>
+{% endmacro %}

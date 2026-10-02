@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Student Assignment Tracker{% endblock %}
+{% block content %}
+<div class="page-heading dashboard-heading">
+    <div>
+        <p class="eyebrow">STUDENT WORKSPACE</p>
+        <h1>Dashboard</h1>
+        <p class="page-subtitle">Stay on top of your assignments, deadlines and academic progress.</p>
+    </div>
+    <div class="quick-actions">
+        <a class="btn btn-primary" href="{{ url_for('assignments.create') }}"><span aria-hidden="true">+</span> Add
+            assignment</a>
+        <a class="btn" href="{{ url_for('subjects.create') }}"><span aria-hidden="true">+</span> Add subject</a>
+    </div>
+</div>
+
+{% if not stats['has_data'] %}
+<section class="empty-dashboard card">
+    <div class="empty-dashboard-icon" aria-hidden="true">✓</div>
+    <h2>Your dashboard is ready</h2>
+    <p class="empty">Add your first assignment and your progress, deadlines and priorities will appear here.</p>
+    <div class="form-actions centered-actions">
+        <a class="btn btn-primary" href="{{ url_for('assignments.create') }}">Add an assignment</a>
+        <a class="btn" href="{{ url_for('subjects.create') }}">Add a subject</a>
+    </div>
+</section>
+{% else %}
+
+<section class="stat-grid" aria-label="Assignment summary">
+    <a class="stat-card stat-blue" href="{{ url_for('assignments.list_assignments') }}">
+        <span class="stat-icon" aria-hidden="true">▦</span>
+        <span class="stat-value">{{ stats['total'] }}</span>
+        <span class="stat-label">Total assignments</span>
+        <span class="stat-link">View all →</span>
+    </a>
+    <a class="stat-card stat-amber" href="{{ url_for('assignments.list_assignments', status='pending') }}">
+        <span class="stat-icon" aria-hidden="true">○</span>
+        <span class="stat-value">{{ stats['counts']['pending'] }}</span>
+        <span class="stat-label">Pending</span>
+        <span class="stat-link">View pending →</span>
+    </a>
+    <a class="stat-card stat-purple" href="{{ url_for('assignments.list_assignments', status='in_progress') }}">
+        <span class="stat-icon" aria-hidden="true">↗</span>
+        <span class="stat-value">{{ stats['counts']['in_progress'] }}</span>
+        <span class="stat-label">In progress</span>
+        <span class="stat-link">Keep going →</span>
+    </a>
+    <a class="stat-card stat-green" href="{{ url_for('assignments.list_assignments', status='completed') }}">
+        <span class="stat-icon" aria-hidden="true">✓</span>
+        <span class="stat-value">{{ stats['counts']['completed'] }}</span>
+        <span class="stat-label">Completed</span>
+        <span class="stat-link">View completed →</span>
+    </a>
+    <a class="stat-card stat-red {{ 'has-alert' if stats['overdue'] else '' }}"
+        href="{{ url_for('assignments.list_assignments', overdue=1) }}">
+        <span class="stat-icon" aria-hidden="true">!</span>
+        <span class="stat-value">{{ stats['overdue'] }}</span>
+        <span class="stat-label">Overdue</span>
+        <span class="stat-link">Review overdue →</span>
+    </a>
+</section>
+
+<section class="deadline-strip">
+    <div class="deadline-item">
+        <span class="deadline-icon deadline-icon-today" aria-hidden="true">◷</span>
+        <div>
+            <strong>{{ stats['due_today'] }}</strong>
+            <span>Due today</span>
+        </div>
+    </div>
+    <div class="deadline-divider" aria-hidden="true"></div>
+    <div class="deadline-item">
+        <span class="deadline-icon" aria-hidden="true">▣</span>
+        <div>
+            <strong>{{ stats['due_this_week'] }}</strong>
+            <span>Due within {{ stats['due_soon_days'] }} days</span>
+        </div>
+    </div>
+    <div class="deadline-divider" aria-hidden="true"></div>
+    <div class="deadline-item">
+        <span class="deadline-icon deadline-icon-alert" aria-hidden="true">!</span>
+        <div>
+            <strong>{{ stats['overdue'] }}</strong>
+            <span>Need attention</span>
+        </div>
+    </div>
+</section>
+
+<div class="dash-grid">
+    <section class="card progress-card">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">YOUR PROGRESS</p>
+                <h2>Overall progress</h2>
+            </div>
+            <span class="progress-percent">{{ stats['completion_rate'] }}%</span>
+        </div>
+        <div class="progress progress-large" role="progressbar" aria-label="Overall completion"
+            aria-valuenow="{{ stats['completion_rate'] }}" aria-valuemin="0" aria-valuemax="100">
+            <span style="width: {{ stats['completion_rate'] }}%"></span>
+        </div>
+        <div class="progress-meta">
+            <span><strong>{{ stats['counts']['completed'] }}</strong> completed</span>
+            <span><strong>{{ stats['open'] }}</strong> still open</span>
+        </div>
+        <a class="text-link" href="{{ url_for('assignments.list_assignments') }}">View all assignments →</a>
+    </section>
+
+    <section class="card priority-card">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">OPEN WORK</p>
+                <h2>Priority breakdown</h2>
+            </div>
+        </div>
+        {% for p in stats['priorities'] %}
+        <div class="bar-row priority-row">
+            <div class="bar-label-wrap">
+                <span class="priority-dot priority-{{ p['value'] }}"></span>
+                <span class="bar-label">{{ p['label'] }}</span>
+            </div>
+            <div class="progress"><span class="bar-{{ p['value'] }}" style="width: {{ p['percent'] }}%"></span></div>
+            <a class="bar-count" href="{{ url_for('assignments.list_assignments', priority=p['value']) }}">{{ p['count']
+                }}</a>
+        </div>
+        {% endfor %}
+        {% if stats['open'] == 0 %}<p class="muted">Nothing open. Well done!</p>{% endif %}
+    </section>
+</div>
+
+<div class="dash-grid">
+    <section class="card list-card">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow eyebrow-danger">NEEDS ATTENTION</p>
+                <h2>Overdue assignments</h2>
+            </div>
+            {% if stats['overdue'] %}<span class="section-count danger-count">{{ stats['overdue'] }}</span>{% endif %}
+        </div>
+        {% if stats['overdue_list'] %}
+        <ul class="item-list">
+            {% for a in stats['overdue_list'] %}
+            <li>
+                <div class="item-main">
+                    <span class="item-status status-overdue" aria-hidden="true"></span>
+                    <div>
+                        <a class="item-title" href="{{ url_for('assignments.detail', assignment_id=a['id']) }}">{{
+                            a['title'] }}</a>
+                        <span class="muted">{{ a['subject_name'] }}</span>
+                    </div>
+                </div>
+                <span class="badge badge-overdue">{{ a['due_label'] }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% if stats['overdue'] > stats['overdue_list']|length %}
+        <a class="text-link" href="{{ url_for('assignments.list_assignments', overdue=1) }}">See all {{ stats['overdue']
+            }} overdue →</a>
+        {% endif %}
+        {% else %}
+        <div class="empty-state-small">
+            <span class="empty-state-icon success-icon" aria-hidden="true">✓</span>
+            <p>No overdue assignments. You're on track!</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="card list-card">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">UPCOMING</p>
+                <h2>Next {{ stats['due_soon_days'] }} days</h2>
+            </div>
+            {% if stats['due_this_week'] %}<span class="section-count">{{ stats['due_this_week'] }}</span>{% endif %}
+        </div>
+        {% if stats['due_soon'] %}
+        <ul class="item-list">
+            {% for a in stats['due_soon'] %}
+            <li>
+                <div class="item-main">
+                    <span class="item-status status-due" aria-hidden="true"></span>
+                    <div>
+                        <a class="item-title" href="{{ url_for('assignments.detail', assignment_id=a['id']) }}">{{
+                            a['title'] }}</a>
+                        <span class="muted">{{ a['subject_name'] }}</span>
+                    </div>
+                </div>
+                <span class="badge badge-due">{{ a['due_label'] }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% if stats['due_this_week'] > stats['due_soon']|length %}
+        <p class="muted">Showing {{ stats['due_soon']|length }} of {{ stats['due_this_week'] }}. <a class="text-link"
+                href="{{ url_for('assignments.list_assignments', sort='deadline_asc') }}">See all →</a></p>
+        {% endif %}
+        {% else %}
+        <div class="empty-state-small">
+            <span class="empty-state-icon" aria-hidden="true">✓</span>
+            <p>Nothing due in the next {{ stats['due_soon_days'] }} days.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+<section class="card subject-progress-card">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">ACADEMIC OVERVIEW</p>
+            <h2>Progress by subject</h2>
+        </div>
+        <a class="text-link" href="{{ url_for('subjects.list_subjects') }}">Manage subjects →</a>
+    </div>
+    {% if stats['subjects'] %}
+    <div class="subject-list">
+        {% for s in stats['subjects'] %}
+        <a class="subject-progress-row" href="{{ url_for('assignments.list_assignments', subject=s['id']) }}">
+            <div class="subject-info">
+                <strong>{{ s['name'] }}</strong>
+                {% if s['code'] %}<span>{{ s['code'] }}</span>{% endif %}
+            </div>
+            <div class="subject-bar-wrap">
+                <div class="progress"><span style="width: {{ s['percent'] }}%"></span></div>
+            </div>
+            <div class="subject-stats">
+                <strong>{{ s['percent'] }}%</strong>
+                <span>{{ s['completed'] }}/{{ s['total'] }}</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">No subjects yet.</p>
+    {% endif %}
+</section>
+
+<section class="quick-action-panel">
+    <div>
+        <p class="eyebrow">READY FOR THE NEXT TASK?</p>
+        <h2>Keep your workload organised.</h2>
+        <p>Capture new work as soon as you receive it so nothing slips through the cracks.</p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('assignments.create') }}">+ Add assignment</a>
+</section>
+
+{% endif %}
+{% endblock %}

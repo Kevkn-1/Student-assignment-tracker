@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% from "assignments/_macros.html" import status_form, priority_badge with context %}
+{% block title %}Assignments - Student Assignment Tracker{% endblock %}
+{% block content %}
+<section class="card">
+    <div class="card-header">
+        <h2>Assignments</h2>
+        <a class="btn btn-primary" href="{{ url_for('assignments.create') }}">Add assignment</a>
+    </div>
+
+    <form method="get" class="filter-bar" action="{{ url_for('assignments.list_assignments') }}">
+        <div class="filter-group">
+            <label for="filter-subject">Subject</label>
+            <select id="filter-subject" name="subject_id" data-autosubmit>
+                <option value="">All subjects</option>
+                {% for s in subjects %}
+                <option value="{{ s['id'] }}" {{ 'selected' if filters['subject_id']|string == s['id']|string }}>{{ s['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-status">Status</label>
+            <select id="filter-status" name="status" data-autosubmit>
+                <option value="">All statuses</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {{ 'selected' if filters['status'] == value }}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-priority">Priority</label>
+            <select id="filter-priority" name="priority" data-autosubmit>
+                <option value="">All priorities</option>
+                {% for value, label in priority_choices %}
+                <option value="{{ value }}" {{ 'selected' if filters['priority'] == value }}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-sort">Sort by</label>
+            <select id="filter-sort" name="sort" data-autosubmit>
+                {% for value, label in sort_choices %}
+                <option value="{{ value }}" {{ 'selected' if filters['sort'] == value }}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-q">Keyword</label>
+            <input type="search" id="filter-q" name="q" value="{{ filters['q'] }}"
+                placeholder="Title or description">
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-overdue">Overdue only</label>
+            <input type="checkbox" id="filter-overdue" name="overdue" value="1"
+                {{ 'checked' if filters['overdue'] }}>
+        </div>
+
+        <div class="filter-actions">
+            <noscript><button type="submit" class="btn">Filter</button></noscript>
+            {% if is_filtered %}
+            <a href="{{ url_for('assignments.list_assignments') }}" class="btn btn-clear">Reset</a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if total > 0 %}
+    <p class="muted">Showing {{ assignments|length }} of {{ total }} assignments</p>
+    {% endif %}
+
+    {% if assignments %}
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Subject</th>
+                    <th>Priority</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in assignments %}
+                <tr>
+                    <td><a href="{{ url_for('assignments.detail', assignment_id=a['id']) }}">{{ a['title'] }}</a></td>
+                    <td>{{ a['subject_name'] }}</td>
+                    <td>{{ priority_badge(a['priority']) }}</td>
+                    <td>
+                        {{ a['deadline'] }}
+                        {% if a['overdue'] %}<span class="badge badge-overdue">Overdue</span>{% endif %}
+                    </td>
+                    <td>{{ status_form(a, 'list') }}</td>
+                    <td class="actions">
+                        <a class="btn" href="{{ url_for('assignments.edit', assignment_id=a['id']) }}">Edit</a>
+                        <form method="post" action="{{ url_for('assignments.delete', assignment_id=a['id']) }}"
+                            data-confirm="Delete this assignment?">
+                            <input type="hidden" name="return_query"
+                                value="{{ return_query|default('', true) }}">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    {% if is_filtered %}
+    <p class="empty">No assignments match your filters. <a href="{{ url_for('assignments.list_assignments') }}">Clear filters</a></p>
+    {% else %}
+    <p class="empty">No assignments yet. Add your first assignment to get started.</p>
+    {% endif %}
+    {% endif %}
+</section>
+{% endblock %}
